@@ -5,20 +5,34 @@ from core.database import MySQLConnector
 from config.config import CONFIG
 from services.http import http_post
 
-class SMTAT4:
+class Realtime:
     def __init__(self):
         self.db = MySQLConnector(CONFIG['mysql'])
         self.logger = setup_logger(self.__class__.__name__)
 
     def run_service(self):
-        self.logger.info("Service smt at4 running...")
+        self.logger.info("Service realtime running...")
 
         try:
             # connect to db
             self.db.connect()
 
             # process get data
-            query = "SELECT * FROM smt_at4 WHERE flag = %s ORDER BY id ASC"
+            query = """
+                    SELECT id, IdCabang, IdGerbang, IdGardu, Tanggal, Shift, Perioda, Waktu, 
+                        IdPul, IdKspt, NoResi, Golongan, IdAsalGerbang, Metoda, NoKartu, Rupiah, 
+                        Sisa, ObuId, Signature, JumlahInv, NamaInv1, RupiahInv1, Active1, 
+                        NamaInv2, RupiahInv2, Active2, NamaInv3, RupiahInv3, Active3, 
+                        NamaInv4, RupiahInv4, Active4, NamaInv5, RupiahInv5, Active5, 
+                        NamaInv6, RupiahInv6, Active6, NamaInv7, RupiahInv7, Active7, 
+                        NamaInv8, RupiahInv8, Active8, NamaInv9, RupiahInv9, Active9, 
+                        NamaInv10, RupiahInv10, Active10, KodeIntegrator, WaktuEntrance, flag 
+                    FROM smt_realtime 
+                    WHERE Tanggal BETWEEN DATE(NOW() - INTERVAL 35 DAY) AND DATE(NOW()) AND flag = %s 
+                    ORDER BY Waktu ASC 
+                    LIMIT 500
+                """
+
             rows = self.db.fetch(query, 0)
             self.logger.info(f"Ditemukan {len(rows)} data.")
 
@@ -42,7 +56,7 @@ class SMTAT4:
                 mappedData['Tanggal'] = tanggal_iso
 
                 # Kirim ke API
-                response = http_post('http://172.16.26.98:5000/api/data/atb4', mappedData)
+                response = http_post('http://172.16.26.98:5000/api/data/realtime', mappedData)
 
                 # Log responsenya
                 if response['status']['code'] == 0:
@@ -52,7 +66,7 @@ class SMTAT4:
                         
                         # Query yang akan di-execute
                         query = """
-                            UPDATE smt_at4 
+                            UPDATE smt_realtime 
                             SET flag = %s, TanggalKirim = %s, ResponseStatus = %s, ResponseMessage = %s 
                             WHERE id = %s
                         """
