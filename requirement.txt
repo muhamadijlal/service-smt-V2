@@ -1,0 +1,6 @@
+mysql-connector-python
+apscheduler
+python-dotenv
+logging
+colorama
+requests
