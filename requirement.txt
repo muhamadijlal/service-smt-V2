@@ -1,6 +1,5 @@
 mysql-connector-python
-apscheduler
+APScheduler
 python-dotenv
-logging
 colorama
 requests
