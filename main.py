@@ -44,4 +44,4 @@ def run_scheduler():
 
 if __name__ == "__main__":
     main()
-    # run_scheduler()
+    run_scheduler()
